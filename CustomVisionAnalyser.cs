@@ -12,7 +12,7 @@ public class CustomVisionAnalyser : MonoBehaviour
     /// <summary>
     /// Split JsonFile
     /// </summary>
-    char[] separatorChar = { '"' };
+    char separatorChar = '"';
     public string[] tagName = new string[] { "chair", "swivelchair", "laptop", "table" };
     //public string[] tagName = { "chair", "swivelchair", "laptop", "table" };
 
@@ -93,11 +93,14 @@ public class CustomVisionAnalyser : MonoBehaviour
             AnalysisRootObject analysisRootObject = new AnalysisRootObject();
             //CheckText.Instance.SetStatus("Send the Request3");
             analysisRootObject = JsonConvert.DeserializeObject<AnalysisRootObject>(jsonResponse);
-            JsonUtility.FromJsonOverwrite(jsonResponse, analysisRootObject);
+            analysisRootObject = JsonUtility.FromJson<AnalysisRootObject>(jsonResponse);
             CheckText.Instance.SetStatus("Send the Request4");
 
-            if(analysisRootObject!=null)
+            if (analysisRootObject != null)
+            {
                     SceneOrganiser.Instance.FinaliseLabel(analysisRootObject);
+                    CheckText.Instance.SetStatus(analysisRootObject.predictions[0].tagName);
+            }
             else
                 CheckText.Instance.SetStatus("analysisRootObject Null");
         }
@@ -125,12 +128,15 @@ public class CustomVisionAnalyser : MonoBehaviour
 
             //textLines = jsonFileData.Split(separatorChar, System.StringSplitOptions.RemoveEmptyEntries);
             textLines.AddRange(jsonFileData.Split(separatorChar));
+            //CheckText.Instance.SetStatus(textLines[0] + " " + textLines[1] + " " + textLines[2] + " " + textLines[3] + " " + textLines[4] + " " + textLines[5] + " " + textLines[6] + " "
+            //    +textLines[7] + " " + textLines[8] + " " + textLines[9] + " " + textLines[10] + " " + textLines[11]);
+            //CheckText.Instance.SetStatus(tagName[0] + " " + tagName[1] + " " + tagName[2] + " " + tagName[3]);
 
             for (int i = 0; i < tagName.Length; i++)
             {
                 if (textLines.Contains(tagName[i]))
                 {
-                    int index = textLines.BinarySearch(tagName[i]);
+                    int index = textLines.IndexOf(tagName[i]);
                     if (index > 0)
                     {
                         tagOrder.Add(index);
@@ -138,13 +144,14 @@ public class CustomVisionAnalyser : MonoBehaviour
                 }
             }
             tagOrder.Sort();
-            CheckText.Instance.SetStatus(tagOrder[0].ToString());
             //tagOrder.Reverse();
-            for(int i=0; i < tagOrder.Count; i++)
+            for (int i = 0; i < tagOrder.Count; i++)
             {
                 findTagName.Add(textLines[tagOrder[i]]);
+                Debug.Log(textLines[tagOrder[i]]);
+                Debug.Log(findTagName[i]);
             }
-                CheckText.Instance.SetStatus(findTagName[0]) ;
+            CheckText.Instance.SetStatus(findTagName[0]);
         }
 
     }
