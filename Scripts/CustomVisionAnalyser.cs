@@ -5,16 +5,28 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Text.RegularExpressions;
+using System;
 
 public class CustomVisionAnalyser : MonoBehaviour
 {
-
+    [Serializable]
+    public class Prediction
+    {
+        public float probability { get; set; }
+        public string tagName { get; set; }
+    }
     /// <summary>
     /// Split JsonFile
     /// </summary>
     char separatorChar = '"';
     public string[] tagName = new string[] { "chair", "swivelchair", "laptop", "table" };
-    //public string[] tagName = { "chair", "swivelchair", "laptop", "table" };
+
+    /// <summary>
+    /// Current threshold accepted for displaying the label
+    /// Reduce this value to display the recognition more often
+    /// </summary>
+    internal float probabilityThreshold = 0.02f;
 
     /// <summary>
     /// Unique instance of this class
@@ -125,34 +137,62 @@ public class CustomVisionAnalyser : MonoBehaviour
             List<string> textLines = new List<string>();
             List<string> findTagName = new List<string>();
             List<int> tagOrder = new List<int>();
+            List<Prediction> predictions = new List<Prediction> { };
 
             //textLines = jsonFileData.Split(separatorChar, System.StringSplitOptions.RemoveEmptyEntries);
             textLines.AddRange(jsonFileData.Split(separatorChar));
-            //CheckText.Instance.SetStatus(textLines[0] + " " + textLines[1] + " " + textLines[2] + " " + textLines[3] + " " + textLines[4] + " " + textLines[5] + " " + textLines[6] + " "
-            //    +textLines[7] + " " + textLines[8] + " " + textLines[9] + " " + textLines[10] + " " + textLines[11]);
-            //CheckText.Instance.SetStatus(tagName[0] + " " + tagName[1] + " " + tagName[2] + " " + tagName[3]);
+            Debug.Log(textLines);
 
-            for (int i = 0; i < tagName.Length; i++)
+            for (int i = 0; i < textLines.Count; i++)
             {
-                if (textLines.Contains(tagName[i]))
+                for (int j = 0; j < tagName.Length; j++)
                 {
-                    int index = textLines.IndexOf(tagName[i]);
-                    if (index > 0)
+                    if (textLines[i] == tagName[j])
                     {
-                        tagOrder.Add(index);
+                        tagOrder.Add(i);
                     }
                 }
             }
-            tagOrder.Sort();
-            //tagOrder.Reverse();
+
             for (int i = 0; i < tagOrder.Count; i++)
             {
-                findTagName.Add(textLines[tagOrder[i]]);
-                Debug.Log(textLines[tagOrder[i]]);
-                Debug.Log(findTagName[i]);
+                Prediction temp = new Prediction();
+                temp.tagName = textLines[tagOrder[i]];
+                temp.probability = ConvertTofloat(textLines[tagOrder[i] - 7]);
+                CheckText.Instance.SetStatus(textLines[tagOrder[i] - 7]);
+                predictions.Add(temp);
             }
-            CheckText.Instance.SetStatus(findTagName[0]);
-        }
 
+            FindBestTag(predictions);
+        }
+    }
+
+    private float ConvertTofloat(string str)
+    {
+        Regex r = new Regex(@"[0-9]*\.*[0-9]+");
+        Match m = r.Match(str);
+        return float.Parse(m.Value);
+    }
+
+    /// <summary>
+    /// Set the Tags as Text of the last label created. 
+    /// </summary>
+    public void FindBestTag(List<Prediction> predictions)
+    {
+        if (predictions != null)
+        {
+            // Sort the predictions to locate the highest one
+            List<Prediction> sortedPredictions = new List<Prediction>();
+            sortedPredictions = predictions.OrderByDescending(p => p.probability).ToList();
+
+            for (int i = 0; i < sortedPredictions.Count; i++)
+            {
+                if (sortedPredictions[i].probability > probabilityThreshold)
+                {
+                    Debug.Log(sortedPredictions[i].tagName + ", " + sortedPredictions[i].probability);
+                }
+            }
+            CheckText.Instance.SetStatus(sortedPredictions[0].tagName+", " + sortedPredictions[0].probability);
+        }
     }
 }
