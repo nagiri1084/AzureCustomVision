@@ -126,7 +126,7 @@ public class BoundingBox
     public double width { get; set; }
     public double height { get; set; }
 }
-
+/*
 [Serializable]
 public class Prediction
 {
@@ -134,5 +134,12 @@ public class Prediction
     public string tagId { get; set; }
     public string tagName { get; set; }
     public BoundingBox boundingBox { get; set; }
+}
+*/
+[Serializable]
+public class Prediction
+{
+    public float probability { get; set; }
+    public string tagName { get; set; }
 }
 

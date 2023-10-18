@@ -9,12 +9,12 @@ using System.Linq;
 public class SplitJsonFile : MonoBehaviour
 {
 
-    [Serializable]
-    public class Prediction
-    {
-        public float probability { get; set; }
-        public string tagName { get; set; }
-    }
+
+    /// <summary>
+    /// Allows this class to behave like a singleton
+    /// </summary>
+    public static SplitJsonFile Instance;
+
     /// <summary>
     /// Split JsonFile
     /// </summary>
@@ -27,10 +27,23 @@ public class SplitJsonFile : MonoBehaviour
     /// </summary>
     internal float probabilityThreshold = 0.02f;
 
+    /// <summary>
+    /// Called on initialization
+    /// </summary>
+    private void Awake()
+    {
+        // Use this class instance as singleton
+        Instance = this;
+
+        // Add the ImageCapture class to this Gameobject
+        gameObject.AddComponent<CreateLabel>();
+    }
+
     void Start()
     {
         FindTagName(this.gameObject.GetComponent<TextMesh>().text);
         Debug.Log(this.gameObject.GetComponent<TextMesh>().text);
+        CreateLabel.Instance.PlaceAnalysisLabel();
     }
 
     public void FindTagName(string jsonFileData)
@@ -113,6 +126,8 @@ public class SplitJsonFile : MonoBehaviour
             // Sort the predictions to locate the highest one
             List<Prediction> sortedPredictions = new List<Prediction>();
             sortedPredictions = predictions.OrderByDescending(p => p.probability).ToList();
+            Prediction bestPrediction = new Prediction();
+            bestPrediction = sortedPredictions[0];
 
             for (int i = 0; i < sortedPredictions.Count; i++)
             {
@@ -121,6 +136,14 @@ public class SplitJsonFile : MonoBehaviour
                     Debug.Log(sortedPredictions[i].tagName + ", " + sortedPredictions[i].probability);
                 }
             }
+
+            if (bestPrediction != null)
+            {
+                CreateLabel.Instance.FinaliseLabel(bestPrediction);
+                Debug.Log(bestPrediction.tagName);
+            }
+            else
+                Debug.Log("analysisRootObject Null");
         }
     }
 }

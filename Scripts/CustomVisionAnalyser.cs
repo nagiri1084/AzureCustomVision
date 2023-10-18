@@ -10,12 +10,6 @@ using System;
 
 public class CustomVisionAnalyser : MonoBehaviour
 {
-    [Serializable]
-    public class Prediction
-    {
-        public float probability { get; set; }
-        public string tagName { get; set; }
-    }
     /// <summary>
     /// Split JsonFile
     /// </summary>
@@ -107,14 +101,6 @@ public class CustomVisionAnalyser : MonoBehaviour
             analysisRootObject = JsonConvert.DeserializeObject<AnalysisRootObject>(jsonResponse);
             analysisRootObject = JsonUtility.FromJson<AnalysisRootObject>(jsonResponse);
             CheckText.Instance.SetStatus("Send the Request4");
-
-            if (analysisRootObject != null)
-            {
-                    SceneOrganiser.Instance.FinaliseLabel(analysisRootObject);
-                    CheckText.Instance.SetStatus(analysisRootObject.predictions[0].tagName);
-            }
-            else
-                CheckText.Instance.SetStatus("analysisRootObject Null");
         }
     }
 
@@ -184,6 +170,8 @@ public class CustomVisionAnalyser : MonoBehaviour
             // Sort the predictions to locate the highest one
             List<Prediction> sortedPredictions = new List<Prediction>();
             sortedPredictions = predictions.OrderByDescending(p => p.probability).ToList();
+            Prediction bestPrediction = new Prediction();
+            bestPrediction = sortedPredictions[0];
 
             for (int i = 0; i < sortedPredictions.Count; i++)
             {
@@ -193,6 +181,14 @@ public class CustomVisionAnalyser : MonoBehaviour
                 }
             }
             CheckText.Instance.SetStatus(sortedPredictions[0].tagName+", " + sortedPredictions[0].probability);
+
+            if (bestPrediction != null)
+            {
+                SceneOrganiser.Instance.FinaliseLabel(bestPrediction);
+                CheckText.Instance.SetStatus(bestPrediction.tagName);
+            }
+            else
+                CheckText.Instance.SetStatus("analysisRootObject Null");
         }
     }
 }

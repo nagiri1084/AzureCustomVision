@@ -196,6 +196,56 @@ public class SceneOrganiser : MonoBehaviour
         quad.transform.parent = null;
     }
 
+
+    /// <summary>
+    /// Set the Tags as Text of the last label created. 
+    /// </summary>
+    public void FinaliseLabel(Prediction bestPrediction)
+    {
+        if (bestPrediction != null)
+        {
+            lastLabelPlacedText = lastLabelPlaced.GetComponent<TextMesh>();
+
+            quadRenderer = quad.GetComponent<Renderer>() as Renderer;
+            Bounds quadBounds = quadRenderer.bounds;
+
+            // Position the label as close as possible to the Bounding Box of the prediction 
+            // At this point it will not consider depth
+            lastLabelPlaced.transform.parent = quad.transform;
+            //astLabelPlaced.transform.localPosition = CalculateBoundingBoxPosition(quadBounds, bestPrediction.boundingBox);
+
+            // Set the tag text
+            if (bestPrediction.tagName != null)
+            {
+                lastLabelPlacedText.text = bestPrediction.tagName;
+                CheckText.Instance.SetStatus(bestPrediction.tagName + "Exist!");
+                Debug.Log(bestPrediction.tagName + "Exist!");
+            }
+            else
+                CheckText.Instance.SetStatus("bestPrediction.tagName Null");
+
+            // Cast a ray from the user's head to the currently placed label, it should hit the object detected by the Service.
+            // At that point it will reposition the label where the ray HL sensor collides with the object,
+            // (using the HL spatial tracking)
+            CheckText.Instance.SetStatus("FinaliseLabel4");
+            Debug.Log("Repositioning Label");
+            Vector3 headPosition = Camera.main.transform.position;
+            RaycastHit objHitInfo;
+            Vector3 objDirection = lastLabelPlaced.position;
+            if (Physics.Raycast(headPosition, objDirection, out objHitInfo, 30.0f, SpatialMapping.PhysicsRaycastMask))
+            {
+                lastLabelPlaced.position = objHitInfo.point;
+            }
+        }
+        CheckText.Instance.SetStatus("analysisObject.predictions is Null");
+        // Reset the color of the cursor
+        cursor.GetComponent<Renderer>().material.color = Color.green;
+
+        // Stop the analysis process
+        ImageCapture.Instance.ResetImageCapture();
+    }
+
+    /*
     /// <summary>
     /// Set the Tags as Text of the last label created. 
     /// </summary>
@@ -253,6 +303,7 @@ public class SceneOrganiser : MonoBehaviour
         // Stop the analysis process
         ImageCapture.Instance.ResetImageCapture();
     }
+    */
 
     /// <summary>
     /// This method hosts a series of calculations to determine the position 
