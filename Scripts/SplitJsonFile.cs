@@ -27,23 +27,10 @@ public class SplitJsonFile : MonoBehaviour
     /// </summary>
     internal float probabilityThreshold = 0.02f;
 
-    /// <summary>
-    /// Called on initialization
-    /// </summary>
-    private void Awake()
-    {
-        // Use this class instance as singleton
-        Instance = this;
-
-        // Add the ImageCapture class to this Gameobject
-        gameObject.AddComponent<CreateLabel>();
-    }
-
     void Start()
     {
         FindTagName(this.gameObject.GetComponent<TextMesh>().text);
         Debug.Log(this.gameObject.GetComponent<TextMesh>().text);
-        CreateLabel.Instance.PlaceAnalysisLabel();
     }
 
     public void FindTagName(string jsonFileData)
@@ -55,16 +42,13 @@ public class SplitJsonFile : MonoBehaviour
             List<int> tagOrder = new List<int>();
             List<Prediction> predictions = new List<Prediction> { };
 
-    //textLines = jsonFileData.Split(separatorChar, System.StringSplitOptions.RemoveEmptyEntries);
-    textLines.AddRange(jsonFileData.Split(separatorChar));
+            //textLines = jsonFileData.Split(separatorChar, System.StringSplitOptions.RemoveEmptyEntries);
+            textLines.AddRange(jsonFileData.Split(separatorChar));
             Debug.Log(textLines);
-            //CheckText.Instance.SetStatus(textLines[0] + " " + textLines[1] + " " + textLines[2] + " " + textLines[3] + " " + textLines[4] + " " + textLines[5] + " " + textLines[6] + " "
-            //    +textLines[7] + " " + textLines[8] + " " + textLines[9] + " " + textLines[10] + " " + textLines[11]);
-            //CheckText.Instance.SetStatus(tagName[0] + " " + tagName[1] + " " + tagName[2] + " " + tagName[3]);
 
             for (int i = 0; i < textLines.Count; i++)
             {
-                for(int j = 0; j < tagName.Length; j++)
+                for (int j = 0; j < tagName.Length; j++)
                 {
                     if (textLines[i] == tagName[j])
                     {
@@ -72,40 +56,21 @@ public class SplitJsonFile : MonoBehaviour
                     }
                 }
             }
-            /*
-            for (int i = 0; i < tagName.Length; i++)
-            {
-                if (textLines.Contains(tagName[i]))
-                {
-                    Debug.Log(tagName[i]);
-                    int index = textLines.IndexOf(tagName[i]);
-                    Debug.Log(index);
-                    if (index >0)
-                    {
-                        tagOrder.Add(index);
-                    }
-                }
-            }
-            */
+
             for (int i = 0; i < tagOrder.Count; i++)
             {
                 Prediction temp = new Prediction();
                 temp.tagName = textLines[tagOrder[i]];
-                //temp.probability = float.Parse(Regex.Replace(textLines[tagOrder[i] + 2], @"[^a-zA-Z0-9가-힣\s]", ""));
-                temp.probability = ConvertTofloat(textLines[tagOrder[i] + 2]) ;
+                temp.probability = ConvertTofloat(textLines[tagOrder[i] + 2]);
+                Debug.Log(textLines[tagOrder[i] + 5]);
+                Debug.Log(ConvertTofloat(textLines[tagOrder[i] + 5]));
+                temp.boundingBox = new BoundingBox();
+                temp.boundingBox.left = 0.5f;
+                Debug.Log(temp.boundingBox.left);
                 predictions.Add(temp);
-                Debug.Log(tagOrder[i]);
-                Debug.Log(predictions[i].tagName);
-                Debug.Log(predictions[i].probability);
-                //predictions[i].tagName = textLines[tagOrder[i]];
-                //predictions[i].probability = float.Parse(Regex.Replace(textLines[tagOrder[i] + 2], @"[^0-9]", "1"));
-                //Debug.Log(tagOrder[i]);
-                //Debug.Log(predictions[i].tagName);
-                //Debug.Log(predictions[i].probability);
-                //Debug.Log(float.Parse(Regex.Replace(textLines[tagOrder[i] + 2], @"[^0-9]", "1")));
             }
-
             FindBestTag(predictions);
+            Debug.Log(predictions[0].boundingBox.left);
         }
     }
 
@@ -139,7 +104,7 @@ public class SplitJsonFile : MonoBehaviour
 
             if (bestPrediction != null)
             {
-                CreateLabel.Instance.FinaliseLabel(bestPrediction);
+                //CreateLabel.Instance.FinaliseLabel(bestPrediction);
                 Debug.Log(bestPrediction.tagName);
             }
             else

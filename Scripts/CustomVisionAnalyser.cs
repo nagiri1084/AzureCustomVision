@@ -145,10 +145,14 @@ public class CustomVisionAnalyser : MonoBehaviour
                 Prediction temp = new Prediction();
                 temp.tagName = textLines[tagOrder[i]];
                 temp.probability = ConvertTofloat(textLines[tagOrder[i] - 7]);
+                temp.boundingBox = new BoundingBox();
+                temp.boundingBox.left = ConvertTofloat(textLines[tagOrder[i] + 5]);
+                temp.boundingBox.top = ConvertTofloat(textLines[tagOrder[i] + 7]);
+                temp.boundingBox.width = ConvertTofloat(textLines[tagOrder[i] + 9]);
+                temp.boundingBox.height = ConvertTofloat(textLines[tagOrder[i] + 11]);
                 CheckText.Instance.SetStatus(textLines[tagOrder[i] - 7]);
                 predictions.Add(temp);
             }
-
             FindBestTag(predictions);
         }
     }
@@ -181,11 +185,11 @@ public class CustomVisionAnalyser : MonoBehaviour
                 }
             }
             CheckText.Instance.SetStatus(sortedPredictions[0].tagName+", " + sortedPredictions[0].probability);
-
+            
             if (bestPrediction != null)
             {
                 SceneOrganiser.Instance.FinaliseLabel(bestPrediction);
-                CheckText.Instance.SetStatus(bestPrediction.tagName);
+                //CheckText.Instance.SetStatus(bestPrediction.tagName+", "+bestPrediction.boundingBox.left);
             }
             else
                 CheckText.Instance.SetStatus("analysisRootObject Null");

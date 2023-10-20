@@ -121,10 +121,10 @@ public class AnalysisRootObject
 [Serializable]
 public class BoundingBox
 {
-    public double left { get; set; }
-    public double top { get; set; }
-    public double width { get; set; }
-    public double height { get; set; }
+    public float left { get; set; }
+    public float top { get; set; }
+    public float width { get; set; }
+    public float height { get; set; }
 }
 /*
 [Serializable]
@@ -141,5 +141,6 @@ public class Prediction
 {
     public float probability { get; set; }
     public string tagName { get; set; }
+    public BoundingBox boundingBox { get; set; }
 }
 

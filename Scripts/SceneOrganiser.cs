@@ -202,17 +202,21 @@ public class SceneOrganiser : MonoBehaviour
     /// </summary>
     public void FinaliseLabel(Prediction bestPrediction)
     {
+        CheckText.Instance.SetStatus("FinaliseLabel1");
         if (bestPrediction != null)
         {
+            CheckText.Instance.SetStatus("FinaliseLabel2");
             lastLabelPlacedText = lastLabelPlaced.GetComponent<TextMesh>();
 
+            CheckText.Instance.SetStatus("quadRenderer");
             quadRenderer = quad.GetComponent<Renderer>() as Renderer;
             Bounds quadBounds = quadRenderer.bounds;
 
             // Position the label as close as possible to the Bounding Box of the prediction 
             // At this point it will not consider depth
+            CheckText.Instance.SetStatus("Bounding Box of the prediction ");
             lastLabelPlaced.transform.parent = quad.transform;
-            //astLabelPlaced.transform.localPosition = CalculateBoundingBoxPosition(quadBounds, bestPrediction.boundingBox);
+            lastLabelPlaced.transform.localPosition = CalculateBoundingBoxPosition(quadBounds, bestPrediction.boundingBox);
 
             // Set the tag text
             if (bestPrediction.tagName != null)
@@ -228,7 +232,6 @@ public class SceneOrganiser : MonoBehaviour
             // At that point it will reposition the label where the ray HL sensor collides with the object,
             // (using the HL spatial tracking)
             CheckText.Instance.SetStatus("FinaliseLabel4");
-            Debug.Log("Repositioning Label");
             Vector3 headPosition = Camera.main.transform.position;
             RaycastHit objHitInfo;
             Vector3 objDirection = lastLabelPlaced.position;
@@ -237,7 +240,6 @@ public class SceneOrganiser : MonoBehaviour
                 lastLabelPlaced.position = objHitInfo.point;
             }
         }
-        CheckText.Instance.SetStatus("analysisObject.predictions is Null");
         // Reset the color of the cursor
         cursor.GetComponent<Renderer>().material.color = Color.green;
 
@@ -314,16 +316,16 @@ public class SceneOrganiser : MonoBehaviour
     {
         Debug.Log($"BB: left {boundingBox.left}, top {boundingBox.top}, width {boundingBox.width}, height {boundingBox.height}");
 
-        double centerFromLeft = boundingBox.left + (boundingBox.width / 2);
-        double centerFromTop = boundingBox.top + (boundingBox.height / 2);
+        float centerFromLeft = boundingBox.left + (boundingBox.width / 2);
+        float centerFromTop = boundingBox.top + (boundingBox.height / 2);
         Debug.Log($"BB CenterFromLeft {centerFromLeft}, CenterFromTop {centerFromTop}");
 
-        double quadWidth = b.size.normalized.x;
-        double quadHeight = b.size.normalized.y;
+        float quadWidth = b.size.normalized.x;
+        float quadHeight = b.size.normalized.y;
         Debug.Log($"Quad Width {b.size.normalized.x}, Quad Height {b.size.normalized.y}");
 
-        double normalisedPos_X = (quadWidth * centerFromLeft) - (quadWidth / 2);
-        double normalisedPos_Y = (quadHeight * centerFromTop) - (quadHeight / 2);
+        float normalisedPos_X = (quadWidth * centerFromLeft) - (quadWidth / 2);
+        float normalisedPos_Y = (quadHeight * centerFromTop) - (quadHeight / 2);
 
         return new Vector3((float)normalisedPos_X, (float)normalisedPos_Y, 0);
     }
