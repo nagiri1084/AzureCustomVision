@@ -124,6 +124,7 @@ public class ImageCapture : MonoBehaviour
         // Begin capture process, set the image format
         PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject)
         {
+            CheckText.Instance.SetStatus("PhotoCapture");
             photoCaptureObject = captureObject;
 
             CameraParameters camParameters = new CameraParameters
@@ -137,6 +138,7 @@ public class ImageCapture : MonoBehaviour
             // Capture the image from the camera and save it in the App internal folder
             captureObject.StartPhotoModeAsync(camParameters, delegate (PhotoCapture.PhotoCaptureResult result)
             {
+                CheckText.Instance.SetStatus("CapturedImage");
                 string filename = string.Format(@"CapturedImage{0}.jpg", captureCount);
                 filePath = Path.Combine(Application.persistentDataPath, filename);
                 captureCount++;

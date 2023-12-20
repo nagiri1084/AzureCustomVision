@@ -169,6 +169,7 @@ public class SceneOrganiser : MonoBehaviour
     /// </summary>
     public void PlaceAnalysisLabel()
     {
+        CheckText.Instance.SetStatus("PlaceAnalysisLabel1");
         lastLabelPlaced = Instantiate(label.transform, cursor.transform.position, transform.rotation);
         lastLabelPlacedText = lastLabelPlaced.GetComponent<TextMesh>();
         lastLabelPlaced.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
@@ -194,6 +195,7 @@ public class SceneOrganiser : MonoBehaviour
         // to allow the image on the quad to be as precisely imposed to the real world as possible
         quad.transform.localScale = new Vector3(3f, 1.65f, 1f);
         quad.transform.parent = null;
+        CheckText.Instance.SetStatus("PlaceAnalysisLabel2");
     }
 
 
@@ -246,66 +248,6 @@ public class SceneOrganiser : MonoBehaviour
         // Stop the analysis process
         ImageCapture.Instance.ResetImageCapture();
     }
-
-    /*
-    /// <summary>
-    /// Set the Tags as Text of the last label created. 
-    /// </summary>
-    public void FinaliseLabel(AnalysisRootObject analysisObject)
-    {
-        CheckText.Instance.SetStatus("FinaliseLabel");
-        if (analysisObject.predictions != null)
-        {
-            lastLabelPlacedText = lastLabelPlaced.GetComponent<TextMesh>();
-            // Sort the predictions to locate the highest one
-            List<Prediction> sortedPredictions = new List<Prediction>();
-            sortedPredictions = analysisObject.predictions.OrderBy(p => p.probability).ToList();
-            Prediction bestPrediction = new Prediction();
-            bestPrediction = sortedPredictions[sortedPredictions.Count - 1];
-
-            CheckText.Instance.SetStatus("FinaliseLabel2");
-            if (bestPrediction.probability > probabilityThreshold)
-            {
-                quadRenderer = quad.GetComponent<Renderer>() as Renderer;
-                Bounds quadBounds = quadRenderer.bounds;
-
-                // Position the label as close as possible to the Bounding Box of the prediction 
-                // At this point it will not consider depth
-                lastLabelPlaced.transform.parent = quad.transform;
-                lastLabelPlaced.transform.localPosition = CalculateBoundingBoxPosition(quadBounds, bestPrediction.boundingBox);
-
-                CheckText.Instance.SetStatus("FinaliseLabel3");
-                // Set the tag text
-                if (bestPrediction.tagName != null)
-                {
-                    lastLabelPlacedText.text = bestPrediction.tagName;
-                    CheckText.Instance.SetStatus(bestPrediction.tagName + "Exist!");
-                }
-                else
-                    CheckText.Instance.SetStatus("bestPrediction.tagName Null");
-
-                // Cast a ray from the user's head to the currently placed label, it should hit the object detected by the Service.
-                // At that point it will reposition the label where the ray HL sensor collides with the object,
-                // (using the HL spatial tracking)
-                CheckText.Instance.SetStatus("FinaliseLabel4");
-                Debug.Log("Repositioning Label");
-                Vector3 headPosition = Camera.main.transform.position;
-                RaycastHit objHitInfo;
-                Vector3 objDirection = lastLabelPlaced.position;
-                if (Physics.Raycast(headPosition, objDirection, out objHitInfo, 30.0f, SpatialMapping.PhysicsRaycastMask))
-                {
-                    lastLabelPlaced.position = objHitInfo.point;
-                }
-            }
-        }
-        CheckText.Instance.SetStatus("analysisObject.predictions is Null");
-        // Reset the color of the cursor
-        cursor.GetComponent<Renderer>().material.color = Color.green;
-
-        // Stop the analysis process
-        ImageCapture.Instance.ResetImageCapture();
-    }
-    */
 
     /// <summary>
     /// This method hosts a series of calculations to determine the position 
